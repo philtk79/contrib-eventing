@@ -27,7 +27,10 @@ Each milestone ends with something that runs on a local kind setup.
    [milestone 5](milestone-5.md).
 6. **Provider events.** Providers publish their own events through the
    ingress ([#14](https://github.com/platform-mesh/contrib-eventing/issues/14)).
-   Runs in parallel with milestone 5.
+   Runs in parallel with milestone 5. Also proposed there, decided at the
+   checkpoint: org isolation with a delivery guard, org- and account-level
+   subscriptions, providers receiving events. Details:
+   [milestone 6](milestone-6.md).
 7. **Later.** Sending user created and deleted from the `User` CRD of ADR 018,
    for any IdP. Org- and account-level subscriptions, kcp resource events,
    more than one kcp shard.
