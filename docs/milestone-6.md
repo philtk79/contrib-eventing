@@ -47,8 +47,9 @@ What already holds:
 
 - **Publishing.** Only the platform's own adapters may publish. The ingress
   authenticates every sender before an event reaches the broker.
-- **Subscribing.** Only platform admins subscribe today, in
-  `root:providers:eventing`; orgs can't bind the export. A Subscription
+- **Subscribing.** Only platform admins subscribe today, in eventing's
+  provider workspace (named by its `ManagedProvider` since milestone 4); orgs
+  can't bind the export. A Subscription
   without `filter.orgs` gets every org, which is meant for the platform
   operator and nobody else.
 - **Inside the cluster.** NetworkPolicies keep everything but our ingress away
