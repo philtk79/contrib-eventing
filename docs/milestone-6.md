@@ -135,7 +135,8 @@ Moved here from milestone 4
 4. **Ingress.** Accepts a provider's event only for a declared type, and only
    for an org (and account, `pmaccount`) that bound the provider's export. It
    sets `source` from the provider, never from the event, and checks `pmorg`
-   and `pmaccount` against the bindings it reads through the eventing export.
+   and `pmaccount` against the bindings it reads through the core export.
+   Decision 7.
    `io.platform-mesh.*` stays reserved for the platform's own adapters.
 5. **Sample provider.** Installed through its own `ManagedProvider`,
    publishes one event that reaches a Subscription. The e2e also shows that an
@@ -250,8 +251,9 @@ Moved here from milestone 4
    - c) A client credentials token from the platform's IdP.
 
    For the declaration, a resource in the provider's workspace names the
-   sender and the event types. The ingress reads it and the provider's
-   APIBindings through the eventing export.
+   sender and the event types. The ingress reads it through the eventing
+   export; which orgs and accounts bound the provider it reads as in
+   Decision 7.
 
    **Proposal: a)** for this milestone, b) or c) once a provider outside the
    runtime cluster needs it. The ADR decides.
@@ -297,6 +299,38 @@ Moved here from milestone 4
 
    **Proposal: a)**: the org decides what it shares, with the kcp mechanism
    it already uses to accept a provider.
+7. **How eventing learns which orgs and accounts bound a provider.** Orgs
+   don't bind the eventing export, so eventing can't see their bindings
+   through it. Tested on a local platform-mesh with the httpbin provider,
+   bound in an org and in one of its accounts:
+   - a) The provider's own export. Eventing watches APIBindings through the
+     provider's APIExport and sees only the bindings to it, read-only. Each
+     provider has to grant eventing's workspace read access to its export,
+     otherwise 403. The account's org still has to come from the core export.
+   - b) The core export (`core.platform-mesh.io`). It already claims
+     `apibindings` in every org and account, and eventing already has a
+     connection to it. One watch sees all bindings, nothing to set up per
+     provider, and the same connection answers which org an account belongs
+     to (`AccountInfo`). But the connection can also create and delete
+     APIBindings in every org, though eventing only reads.
+   - c) Orgs bind an eventing export that claims `apibindings`. Every org
+     would have to bind eventing and accept the claim before its providers'
+     events work.
+   - d) An identity that reads APIBindings in all workspaces. Far more than
+     eventing needs.
+   - e) An index of which org uses which provider, kept by core or the
+     marketplace. There is none today.
+   - f) The provider says which orgs it serves. That is what the ingress has
+     to check, so it can't be the source.
+
+   Both a) and b) saw a bind and an unbind, in the org and in the account,
+   in under half a second.
+
+   **Proposal: b)**: providers stay as they are (an APIExport and their
+   metadata, nothing for eventing), it covers orgs and accounts, and it is
+   the view core already has of what an org binds. We ask core for a
+   read-only connection; until then the ADR states that eventing only lists
+   and watches. a) is the way out if core or a security review says no.
 
 ## Order
 
