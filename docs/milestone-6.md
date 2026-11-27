@@ -312,8 +312,9 @@ Moved here from milestone 4
      `apibindings` in every org and account, and eventing already has a
      connection to it. One watch sees all bindings, nothing to set up per
      provider, and the same connection answers which org an account belongs
-     to (`AccountInfo`). But the connection can also create and delete
-     APIBindings in every org, though eventing only reads.
+     to (`AccountInfo`). Without `readOnly` the connection could also
+     create and delete APIBindings in every org; with it (platform-mesh#591)
+     it gets only get, list and watch.
    - c) Orgs bind an eventing export that claims `apibindings`. Every org
      would have to bind eventing and accept the claim before its providers'
      events work.
@@ -327,11 +328,13 @@ Moved here from milestone 4
    Both a) and b) saw a bind and an unbind, in the org and in the account,
    in under half a second.
 
-   **Proposal: b)**: providers stay as they are (an APIExport and their
+   **Decided: b)**: providers stay as they are (an APIExport and their
    metadata, nothing for eventing), it covers orgs and accounts, and it is
-   the view core already has of what an org binds. We ask core for a
-   read-only connection; until then the ADR states that eventing only lists
-   and watches. a) is the way out if core or a security review says no.
+   the view core already has of what an org binds. Eventing's core
+   connection is read-only: with `readOnly` it still lists and watches
+   APIBindings and reads `AccountInfo`, while create, patch and delete get
+   403 (tested locally). The install sets it where the operator supports it.
+   a) is the way out if a security review says no.
 
 ## Order
 
